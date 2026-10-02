@@ -1,0 +1,24 @@
+name: Sync all forks
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-forks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync all forks
+        run: |
+          # Get all forked repos and sync them
+          gh repo list --fork --json nameWithOwner -q '.[].nameWithOwner' | while read repo; do
+            echo "Syncing $repo..."
+            gh repo sync "$repo" --branch main
+            sleep 1
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
